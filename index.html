@@ -37,18 +37,18 @@
       background: var(--bg);
       color: var(--ink);
       font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
-      font-size: 18px;
+      font-size: 20px;
       line-height: 1.45;
       min-height: 100vh;
       padding: clamp(16px, 3vw, 40px);
     }
 
-    /* ---------- Grid ---------- */
+    /* ---------- Секции в одну колонну (скролл страницы) ---------- */
     .grid {
       display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap: clamp(16px, 2vw, 28px);
-      max-width: 1400px;
+      grid-template-columns: minmax(0, 1fr);
+      gap: clamp(20px, 3vw, 36px);
+      max-width: min(680px, 100%);
       margin: 0 auto;
     }
 
@@ -94,16 +94,14 @@
       transform: rotate(5deg);
     }
 
-    /* Desktop spans — row 1: 4 cards, row 2: 3 cards, row 3: 3 cards */
-    .card--1, .card--2, .card--3, .card--4 { grid-column: span 3; }
-    .card--5, .card--6, .card--7          { grid-column: span 4; }
-    .card--8, .card--9, .card--10         { grid-column: span 4; }
+    /* Каждая карточка — отдельная секция на всю ширину колонки */
+    .grid > .card { grid-column: 1; }
 
     /* ---------- Typography ---------- */
     .title-serif {
       font-family: "Cormorant Garamond", serif;
       font-weight: 500;
-      font-size: clamp(22px, 2.2vw, 30px);
+      font-size: clamp(26px, 2.6vw, 36px);
       line-height: 1.15;
       text-align: center;
       color: var(--ink);
@@ -113,14 +111,14 @@
       font-weight: 600;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      font-size: clamp(14px, 1.2vw, 17px);
+      font-size: clamp(16px, 1.35vw, 20px);
       line-height: 1.3;
       text-align: center;
       color: var(--ink);
     }
     .subtitle {
       font-family: "Cormorant Garamond", serif;
-      font-size: 15px;
+      font-size: 17px;
       text-align: center;
       color: var(--ink-soft);
     }
@@ -128,20 +126,20 @@
       font-family: "Montserrat", sans-serif;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      font-size: 11px;
+      font-size: 13px;
       color: var(--ink-soft);
       text-align: center;
     }
     .big {
       font-family: "Cormorant Garamond", serif;
-      font-size: clamp(20px, 2vw, 26px);
+      font-size: clamp(23px, 2.25vw, 30px);
       line-height: 1.25;
       text-align: center;
     }
     .note {
       font-family: "Cormorant Garamond", serif;
       font-style: italic;
-      font-size: 13px;
+      font-size: 15px;
       line-height: 1.45;
       color: var(--ink-soft);
       text-align: center;
@@ -149,7 +147,7 @@
     .heart {
       display: block;
       text-align: center;
-      font-size: 22px;
+      font-size: 26px;
       color: var(--ink);
       margin: 2px 0;
     }
@@ -175,7 +173,7 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      font-size: 16px;
+      font-size: 18px;
       color: var(--ink);
       padding: 0 4px;
     }
@@ -190,14 +188,14 @@
       left: 2px;
       top: 0;
       color: var(--ink);
-      font-size: 18px;
+      font-size: 20px;
       line-height: 1.2;
     }
     .icon-list {
       display: flex;
       flex-direction: column;
       gap: 10px;
-      font-size: 16px;
+      font-size: 18px;
       padding: 0 2px;
     }
     .icon-list li {
@@ -208,7 +206,7 @@
       line-height: 1.3;
     }
     .icon-list .ico {
-      font-size: 18px;
+      font-size: 20px;
       text-align: center;
     }
 
@@ -269,7 +267,7 @@
       font-weight: 600;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      font-size: clamp(13px, 1vw, 15px);
+      font-size: clamp(15px, 1.15vw, 18px);
       line-height: 1.35;
       margin: 4px auto 6px;
       max-width: 80%;
@@ -311,13 +309,13 @@
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      font-size: 12px;
+      font-size: 14px;
       padding: 3px 10px;
       border-radius: 2px;
     }
 
     .details-text {
-      font-size: 15px;
+      font-size: 17px;
       line-height: 1.4;
       text-align: center;
       color: var(--ink);
@@ -326,16 +324,16 @@
       display: flex;
       justify-content: space-between;
       gap: 6px;
-      font-size: 22px;
+      font-size: 26px;
       padding: 4px 6px;
       filter: grayscale(0.3) sepia(0.3);
     }
 
-    .contacts p { font-size: 14.5px; line-height: 1.5; color: var(--ink); }
+    .contacts p { font-size: 16.5px; line-height: 1.5; color: var(--ink); }
     .contacts .line { margin-bottom: 10px; }
     .contacts .list {
       font-family: "Cormorant Garamond", serif;
-      font-size: 16px;
+      font-size: 18px;
       line-height: 1.5;
       color: var(--ink);
     }
@@ -347,28 +345,20 @@
 
     /* ---------- Footer ---------- */
     .page-footer {
-      max-width: 1400px;
+      max-width: min(680px, 100%);
       margin: 40px auto 8px;
       text-align: center;
       font-family: "Montserrat", sans-serif;
       letter-spacing: 0.18em;
       text-transform: uppercase;
-      font-size: 11px;
+      font-size: 12px;
       color: var(--ink-soft);
     }
 
     /* ---------- Responsive ---------- */
-    @media (max-width: 1199px) {
-      .grid { grid-template-columns: repeat(2, 1fr); }
-      .card--1, .card--2, .card--3, .card--4,
-      .card--5, .card--6, .card--7,
-      .card--8, .card--9, .card--10 {
-        grid-column: span 1;
-      }
-    }
     @media (max-width: 767px) {
-      body { padding: 12px; font-size: 17px; }
-      .grid { grid-template-columns: 1fr; gap: 18px; }
+      body { padding: 12px; font-size: 19px; }
+      .grid { gap: 18px; }
       .card {
         padding: 26px 18px 26px;
       }
@@ -380,8 +370,8 @@
       .card::before, .card::after { width: 48px; height: 16px; }
     }
     @media (max-width: 380px) {
-      .detail-icons { font-size: 18px; }
-      .bullets, .icon-list { font-size: 15px; }
+      .detail-icons { font-size: 20px; }
+      .bullets, .icon-list { font-size: 17px; }
     }
 
     @media print {
@@ -401,7 +391,7 @@
         <img src="images/photo_2_2026-04-22_17-27-43.jpg" alt="Мама с ребёнком в парке" loading="lazy" />
       </figure>
       <h2 id="s1-title" class="title-serif">
-        Семейная<br />фотосессия<br />в парке
+        Семейная<br />фотосессия<br />на природе
       </h2>
       <p class="subtitle">Памятка для подготовки</p>
       <p class="label-sans">Фотограф Алина</p>
@@ -409,67 +399,70 @@
 
     <!-- Slide 2 — Вступление -->
     <article class="card card--2" aria-labelledby="s2-title">
-      <h2 id="s2-title" class="big">Эта съёмка —<br />не про позирование</h2>
+      <h2 id="s2-title" class="big">Эта съёмка —<br />не про идеальные позы</h2>
       <p class="big">
-        используют<br />
-        <span class="hl">ваши эмоции</span><br />
-        <span class="hl">и моменты</span>
+        это про<br />
+        <span class="hl">живые эмоции</span><br />
+        <span class="hl">и настоящие моменты</span>
       </p>
-      <p class="big">Это про вас...</p>
       <span class="heart" aria-hidden="true">♡</span>
       <p class="note">
-        Я подготовила небольшую памятку,<br />
-        и&nbsp;подготовила нсей совкеки и&nbsp;помогу<br />
-        сделать процесс звес максимально<br />
-        комфортным.
+        Меня зовут Алина, я ваш фотограф.<br />
+        Я буду рядом с вами на съёмке&nbsp;—<br />
+        помогу, подскажу и сделаю так,<br />
+        чтобы вы чувствовали себя<br />
+        легко и естественно.
       </p>
+      <p class="label-sans">@sklyar_raw_ph · @iisemem</p>
     </article>
 
     <!-- Slide 3 — Одежда -->
     <article class="card card--3" aria-labelledby="s3-title">
       <h2 id="s3-title" class="title-sans">Одежда&nbsp;— это</h2>
       <p class="hl-block">
-        <span class="hl" style="font-size:44px;font-weight:700;padding:2px 14px;font-family:'Cormorant Garamond',serif;">80%</span>
-        <span class="title-sans" style="display:inline-block;margin-left:6px;">успеха</span>
+        <span class="hl" style="font-size:50px;font-weight:700;padding:2px 14px;font-family:'Cormorant Garamond',serif;">80%</span>
+        <span class="title-sans" style="display:inline-block;margin-left:6px;">результата</span>
       </p>
       <ul class="bullets">
-        <li>Выбирайте выбирайтеа</li>
-        <li>Избегайте на пережантка</li>
-        <li>Одежда должна япоймать ваши настящие эмоции</li>
-        <li>Главное&nbsp;— это проздааная и&nbsp;колеста</li>
+        <li>Спокойные, благородные оттенки: бежевый, молочный, белый, серый, коричневый</li>
+        <li>Приглушённые цвета: пудровый розовый, мягкий голубой, тёплые коричневые</li>
+        <li>Избегайте ярких кричащих цветов и крупных логотипов</li>
+        <li>Образы семьи должны перекликаться по цвету и настроению</li>
       </ul>
       <figure class="photo photo--wide">
         <img src="images/photo_3_2026-04-22_17-27-43.jpg" alt="Семья в парке в пастельных тонах" loading="lazy" />
       </figure>
     </article>
 
-    <!-- Slide 4 — Когда ребёнку комфортно (v1) -->
+    <!-- Slide 4 — Образы по членам семьи -->
     <article class="card card--4" aria-labelledby="s4-title">
-      <h2 id="s4-title" class="title-sans">Когда ребёнку<br />комфортно&nbsp;— получаются</h2>
-      <p class="title-sans" style="margin-top:-4px;">
-        <span class="hl">Самые живые кадры</span>
-      </p>
+      <h2 id="s4-title" class="title-sans">Образы<br />для каждого</h2>
       <ul class="bullets">
-        <li>Удобная одежда по погоде</li>
-        <li>Любимая игрушка или плед</li>
-        <li>Перекус и&nbsp;вода</li>
-        <li>Хорошее настроение</li>
+        <li><strong>Мамам:</strong> платья, струящиеся ткани, силуэт миди или макси</li>
+        <li><strong>Папам:</strong> рубашки, базовые футболки, лён и хлопок</li>
+        <li><strong>Детям:</strong> главное — комфорт, когда удобно — кадры живые</li>
       </ul>
+      <p class="note">
+        Сомневаетесь в выборе?<br />
+        Смело отправляйте варианты&nbsp;—<br />
+        я с радостью помогу собрать образы 🤍
+      </p>
       <figure class="photo photo--wide" style="aspect-ratio: 4 / 3;">
         <img src="images/photo_4_2026-04-22_17-27-43.jpg" alt="Мама целует ребёнка на природе" loading="lazy" />
       </figure>
     </article>
 
-    <!-- Slide 5 — Когда ребёнку комфортно (v2 с иконками) -->
+    <!-- Slide 5 — Когда ребёнку комфортно -->
     <article class="card card--5" aria-labelledby="s5-title">
       <h2 id="s5-title" class="title-sans">Когда ребёнку комфортно&nbsp;—<br />получаются</h2>
       <p class="title-sans">
         <span class="hl">Самые живые кадры</span>
       </p>
       <ul class="icon-list">
-        <li><span class="ico" aria-hidden="true">🦴</span><span>Удобная одежда по погоде</span></li>
-        <li><span class="ico" aria-hidden="true">🧸</span><span>Любимая игрушка или плед</span></li>
-        <li><span class="ico" aria-hidden="true">🍼</span><span>Перекус и&nbsp;вода</span></li>
+        <li><span class="ico" aria-hidden="true">👕</span><span>Удобная одежда по погоде</span></li>
+        <li><span class="ico" aria-hidden="true">🧸</span><span>Любимая игрушка или плюшевый друг</span></li>
+        <li><span class="ico" aria-hidden="true">🍊</span><span>Перекус и вода</span></li>
+        <li><span class="ico" aria-hidden="true">🧻</span><span>Влажные салфетки</span></li>
         <li><span class="ico" aria-hidden="true">🙂</span><span>Хорошее настроение</span></li>
       </ul>
       <div class="photo-pair">
@@ -485,15 +478,16 @@
     <!-- Slide 6 — Просто будьте вместе -->
     <article class="card card--6" aria-labelledby="s6-title">
       <h2 id="s6-title" class="oval">Просто будьте<br />вместе&nbsp;♡</h2>
-      <p class="big" style="font-size:19px;">
+      <p class="big" style="font-size:22px;">
         Обнимайтесь, смейтесь,<br />
         смотрите друг на друга,<br />
         гуляйте, играйте.
       </p>
-      <p class="big" style="font-size:19px;">
-        Я буду рядом и&nbsp;помогу<br />
-        поймать ваши настящие<br />
-        эмоции
+      <p class="big" style="font-size:22px;">
+        Ребёнку не нужно постоянно<br />
+        смотреть в камеру&nbsp;— беготня,<br />
+        смех и живые моменты<br />
+        это и есть то, ради чего мы снимаем 🤍
       </p>
       <figure class="photo photo--taped photo--wide">
         <img src="images/photo_7_2026-04-22_17-27-43.jpg" alt="Семья обнимается в поле" loading="lazy" />
@@ -506,17 +500,17 @@
       <h2 id="s7-title" class="title-sans">Детали, которые<br />оживляют кадр</h2>
       <p style="text-align:center;"><span class="pill">Базовое:</span></p>
       <p class="details-text">
-        плед, корзинка, шляпа&nbsp;/ панама,<br />
-        любимая игрушка, книги.
+        плед в тон образам, любимая игрушка,<br />
+        книжка, бумажные самолётики.
       </p>
       <div class="detail-icons" aria-hidden="true">
         <span>📚</span><span>🌾</span><span>👒</span><span>🧸</span><span>🌿</span>
       </div>
       <p style="text-align:center;"><span class="pill">По желанию:</span></p>
       <p class="details-text">
-        воздушные шары, мыльные<br />
-        пузыри, фотоаппарат,<br />
-        букет полевых цветов.
+        воздушные шары, мыльные пузыри,<br />
+        цветы, сладкая вата или попкорн,<br />
+        фрукты и яркие вкусности.
       </p>
       <figure class="photo photo--wide">
         <img src="images/photo_8_2026-04-22_17-27-43.jpg" alt="Семья на фоне холмов" loading="lazy" />
@@ -527,22 +521,23 @@
     <article class="card card--8" aria-labelledby="s8-title">
       <h2 id="s8-title" class="title-sans title-underlined">Что взять с&nbsp;собой</h2>
       <ul class="icon-list">
-        <li><span class="ico" aria-hidden="true">🍶</span><span>Вода и&nbsp;перекус</span></li>
-        <li><span class="ico" aria-hidden="true">🧸</span><span>Любимая игрушка</span></li>
-        <li><span class="ico" aria-hidden="true">🛏️</span><span>Плед</span></li>
-        <li><span class="ico" aria-hidden="true">🧻</span><span>Влажные салфетки</span></li>
+        <li><span class="ico" aria-hidden="true">🍶</span><span>Вода и перекус для всех</span></li>
+        <li><span class="ico" aria-hidden="true">🧸</span><span>Любимая игрушка ребёнка</span></li>
+        <li><span class="ico" aria-hidden="true">🛏️</span><span>Плед в тон образам</span></li>
+        <li><span class="ico" aria-hidden="true">🧻</span><span>Влажные и сухие салфетки</span></li>
         <li><span class="ico" aria-hidden="true">👕</span><span>Сменная одежда<br /><em style="font-style:italic;color:var(--ink-soft);">(для малышей)</em></span></li>
         <li><span class="ico" aria-hidden="true">🪮</span><span>Расчёска</span></li>
-        <li><span class="ico" aria-hidden="true">🙂</span><span>Хорошее настроение</span></li>
+        <li><span class="ico" aria-hidden="true">⏰</span><span>Выйдите заранее&nbsp;— не впритык</span></li>
       </ul>
     </article>
 
-    <!-- Slide 9 — Ценные кадры -->
+    <!-- Slide 9 — Самые ценные кадры -->
     <article class="card card--9" aria-labelledby="s9-title">
       <h2 id="s9-title" class="big" style="font-style:italic;">Самые ценные кадры&nbsp;—</h2>
       <p class="big">
         это <span class="hl">не идеальные позы,</span><br />
-        <span class="hl">настоящие эмоции</span>
+        а <span class="hl">смех, объятия, взгляды</span><br />
+        и маленькие живые моменты
       </p>
       <span class="heart" aria-hidden="true">♡</span>
       <figure class="photo photo--taped photo--wide">
@@ -556,23 +551,25 @@
       <div class="contacts">
         <p class="line">
           Вашего фотографа зовут Алина.<br />
-          Я&nbsp;буду рада, если вы заранее<br />
-          напишете имена всех участников<br />
-          съёмки&nbsp;— это поможет сделать наше<br />
-          общение более тёплым и&nbsp;личным.
+          Пожалуйста, не опаздывайте&nbsp;—<br />
+          если выходите впритык,<br />
+          время съёмки сокращается,<br />
+          а нам важно не спешить.
         </p>
         <p class="line">
-          При встрече мы обязательно ещё<br />
-          раз познакомимся.
+          Заранее посмотрите локацию&nbsp;—<br />
+          как добраться и где припарковаться.<br />
+          Это поможет начать съёмку спокойно.
         </p>
         <p class="line">
-          Я&nbsp;буду рядом на&nbsp;протяжении всей<br />
-          съёмки и&nbsp;помогу сделать процесс<br />
-          максимально комфортным&nbsp;♡
+          Вам не нужно быть идеальными&nbsp;—<br />
+          вам нужно быть настоящими.<br />
+          Я рядом, чтобы сохранить<br />
+          именно вашу историю ✨
         </p>
         <p class="list list-title">Контакты:</p>
-        <p class="list">@alina_photograph</p>
-        <p class="list">@ +7 (999) 123-45-67</p>
+        <p class="list">Instagram: @sklyar_raw_ph</p>
+        <p class="list">Telegram: @iisemem</p>
       </div>
       <figure class="photo photo--taped photo--wide">
         <img src="images/photo_10_2026-04-22_17-27-43.jpg" alt="Семья целует малыша" loading="lazy" />
