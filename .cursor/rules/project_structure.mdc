@@ -1,0 +1,292 @@
+---
+alwaysApply: true
+---
+
+# FemFlow — правила проекта
+
+## 1. Суть проекта
+
+**FemFlow** — веб‑приложение сообщества и афиши событий для женщин Ташкента. Пользовательницы:
+
+- **Участница (`participant`)**: регистрируется, просматривает ленту событий, записывается на них, ведёт профиль, общается в чате события, оценивает события после посещения.
+- **Организатор (`organizer`)**: создаёт и публикует события, просматривает записавшихся, после события оценивает участниц (пришла/не пришла/предупредила).
+- **Админ (`admin`)**: повышенная роль (используется в middleware для доступа к `/admin/**`).
+
+**Стек**:
+
+- **Frontend**: Next.js 14 (App Router, React 18, TypeScript, strict), Tailwind CSS, shadcn/ui‑стиль компонентов (`src/components/ui/`), иконки `lucide-react`.
+- **Backend / данные**: Supabase (`@supabase/ssr` + `@supabase/supabase-js`) — Auth (email/password, phone OTP, Google OAuth), Postgres (таблицы `profiles`, `events`, `event_registrations`, `reviews`, `participant_ratings`, `event_messages`), Storage (bucket‑ы `avatars`, `event-covers`), Realtime (подписки на изменения таблиц и на чат).
+- **Уведомления**: Next.js Route Handler `/api/notifications` → Supabase Edge Function `send-notification` → Resend (email) + Eskiz (SMS).
+- **Паттерн UI**: для большинства страниц — две реализации `desktop` + `mobile` в отдельных папках в корне проекта, которые реэкспортируются из `src/app/**`.
+
+## 2. Структура
+
+```
+femflow/
+├── src/                          # Код, подключаемый к роутингу Next.js
+│   ├── app/                      # App Router: страницы, layouts, route handlers
+│   │   ├── layout.tsx            # Корневой layout (HTML, AuthProvider, globals.css)
+│   │   ├── page.tsx              # Главная → реэкспорт из @main_page/MainPage
+│   │   ├── globals.css           # Tailwind + глобальный градиент фона
+│   │   ├── api/
+│   │   │   └── notifications/route.ts     # POST прокси к Edge Function send-notification
+│   │   ├── auth/
+│   │   │   └── callback/route.ts          # OAuth callback Supabase (exchangeCodeForSession)
+│   │   ├── loginpage/
+│   │   │   ├── desktop_ver/page.tsx       # Реэкспорт @loginpage/LoginPage (desktop)
+│   │   │   └── modile_ver/page.tsx        # Реэкспорт @loginpage/LoginPage (mobile, sic: "modile")
+│   │   ├── mainpage/
+│   │   │   ├── main_desktop/page.tsx      # Реэкспорт @main_page/MainPage
+│   │   │   └── main_mobile/page.tsx       # Реэкспорт @main_page/MainPage
+│   │   ├── ivents_info/page.tsx           # Реэкспорт @ivents_info/IventsInfoPage
+│   │   ├── profile/page.tsx               # Реэкспорт @profile/ProfilePage
+│   │   ├── create-event/page.tsx          # Реэкспорт @create_event/CreateEventPage
+│   │   ├── organizer-events/page.tsx      # Реэкспорт @organizer_events/OrganizerEventsPage
+│   │   ├── event-registration/page.tsx    # Реэкспорт @event_registration/EventRegistrationPage
+│   │   ├── my-events/page.tsx             # Реэкспорт @my_events/MyEventsPage
+│   │   ├── rate-event/page.tsx            # Реэкспорт @rate_event/RateEventPage
+│   │   └── rate-participants/page.tsx     # Реэкспорт @rate_participants/RateParticipantsPage
+│   ├── middleware.ts              # Защита роутов по роли (participant/organizer/admin)
+│   ├── components/
+│   │   └── ui/                    # shadcn-style UI-примитивы (см. ниже)
+│   └── lib/
+│       ├── utils.ts               # cn() — объединение классов Tailwind
+│       ├── types.ts               # Доменные типы (User, FemEvent, Registration, …)
+│       ├── event-types.ts         # Справочник EVENT_TYPES (лекция, мастер-класс, …)
+│       ├── store.ts               # Клиентский кэш + запись в Supabase + realtime
+│       ├── use-events.ts          # React-хуки к store (useEvents, useEvent, …)
+│       ├── use-chat.ts            # Хук чата события (event_messages + Realtime)
+│       ├── auth-context.tsx       # AuthProvider / useAuth — обёртка над supabase.auth
+│       ├── upload.ts              # Загрузка аватара / обложки события в Storage
+│       └── supabase/
+│           ├── client.ts          # createBrowserClient (browser)
+│           ├── server.ts          # createServerSupabaseClient + createServiceRoleClient
+│           └── middleware.ts      # createMiddlewareSupabaseClient (для middleware.ts)
+│
+├── main_page/                    # Главная: одна "умная" страница + две вёрстки
+│   ├── MainPage.tsx              # Условный рендер mobile vs desktop, берёт события из useEvents
+│   ├── main_desktop/
+│   │   ├── DesktopMainPage.tsx            # Статичный шаблон desktop (fallback / шаблон)
+│   │   └── components/                    # DesktopHeader, HeroDesktop, CategoriesGrid, …
+│   └── main_mobile/
+│       ├── MobileMainPage.tsx             # Статичный шаблон mobile
+│       └── components/                    # Header, Hero, BottomNav, FeaturedEventCard, …
+│
+├── loginpage/                    # Регистрация / вход
+│   ├── LoginPage.tsx             # Основной LoginPage (mobile + desktop в одном компоненте)
+│   ├── desktop_ver/DesktopLoginPage.tsx   # Альтернативная desktop-вёрстка (заготовка)
+│   └── modile_ver/MobileLoginPage.tsx     # Альтернативная mobile-вёрстка (заготовка, опечатка)
+│
+├── ivents_info/                  # Страница деталей события (+ чат, регистрация)
+│   ├── IventsInfoPage.tsx                 # Точка входа, suspense + роутер
+│   ├── ivents_info_desktop/
+│   │   ├── IventsInfoDesktopPage.tsx
+│   │   └── components/IventsInfoDesktopHeader.tsx
+│   └── ivents_info_mobile/
+│       ├── IventsInfoMobilePage.tsx
+│       └── components/
+│           ├── IventsInfoMobileTopBar.tsx
+│           └── IventsInfoMobileImagePlaceholder.tsx
+│
+├── profile/                      # Профиль пользователя
+│   ├── ProfilePage.tsx                    # Общая страница (переключение mobile/desktop)
+│   ├── profile_desktop/
+│   │   ├── DesktopProfilePage.tsx
+│   │   └── components/                    # ProfileDesktopHeader, EventsToggle, ProfileStatCard
+│   └── profile_mobile/
+│       ├── MobileProfilePage.tsx
+│       └── components/                    # ProfileTopBar, ProfileStats, ProfileEventRow, …
+│
+├── create_event/CreateEventPage.tsx       # Организатор: создание события + загрузка обложки
+├── organizer_events/OrganizerEventsPage.tsx   # Организатор: его события (upcoming/past)
+├── event_registration/EventRegistrationPage.tsx # Форма записи на событие (с согласием)
+├── my_events/MyEventsPage.tsx             # Участница: мои записи (upcoming/past)
+├── rate_event/RateEventPage.tsx           # Оценка события после посещения (звёзды + отзыв)
+├── rate_participants/RateParticipantsPage.tsx # Организатор оценивает участниц
+├── all_one/                               # (пустая) песочница для экспериментов
+│
+├── supabase/
+│   ├── seed.sql                           # Тестовые данные: 1 организатор + 4 события
+│   ├── notifications.sql                  # Шаблон pg_cron для напоминаний (закомментировано)
+│   └── functions/send-notification/index.ts # Edge Function: рассылка email/SMS
+│
+├── next.config.mjs               # Next-конфиг (reactStrictMode, remotePatterns для Unsplash)
+├── tailwind.config.ts            # Палитра fem-*, теневой preset, content globs
+├── tsconfig.json                 # strict TS + алиасы путей
+├── postcss.config.js             # tailwindcss + autoprefixer
+├── components.json               # shadcn-конфиг (algorithm, aliases components/utils)
+├── package.json                  # next/react/supabase/tailwind/radix/lucide
+├── .eslintrc.json                # extends next/core-web-vitals
+├── .env.example                  # Пример переменных окружения
+└── README.md                     # Краткое описание и инструкция по seed
+```
+
+### Алиасы `tsconfig`
+
+- `@/*` → `src/*`
+- `@main_page/*` → `main_page/*`
+- `@loginpage/*` → `loginpage/*`
+- `@profile/*` → `profile/*`
+- `@ivents_info/*` → `ivents_info/*`
+- `@create_event/*` → `create_event/*`
+- `@organizer_events/*` → `organizer_events/*`
+- `@event_registration/*` → `event_registration/*`
+- `@my_events/*` → `my_events/*`
+- `@rate_event/*` → `rate_event/*`
+- `@rate_participants/*` → `rate_participants/*`
+
+### Паттерн «desktop + mobile»
+
+- Страницы, у которых по две вёрстки, живут в корневой папке фичи (например, `profile/`).
+- Корневой компонент (`ProfilePage.tsx`, `MainPage.tsx`, …) чаще всего содержит **обе** вёрстки, переключаемые Tailwind‑классами `md:hidden` / `hidden md:block`, и подтягивает данные из `src/lib/*`.
+- В папках `*_desktop/` и `*_mobile/` (и `desktop_ver/` / `modile_ver/` для `loginpage`) лежат вспомогательные компоненты и альтернативные шаблоны.
+- В `src/app/**/page.tsx` лежит только `export { default } from "@alias/..."` — App Router используется как тонкая обёртка.
+
+## 3. Описание каждого файла
+
+### Корень
+
+- **`package.json`** — зависимости/скрипты. Команды: `next dev`, `next build`, `next start`, `next lint`. Ключевые deps: `next@14`, `react@18`, `@supabase/ssr`, `@supabase/supabase-js`, `tailwindcss`, `tailwind-merge`, `clsx`, `class-variance-authority`, `lucide-react`, `@radix-ui/react-*`.
+- **`next.config.mjs`** — `reactStrictMode: true` и whitelisted `images.remotePatterns` для `images.unsplash.com`.
+- **`tailwind.config.ts`** — content‑globs по всем папкам страниц, кастомный `borderRadius` (`lg..3xl`), палитра `fem.50..900` (розовые оттенки) и `boxShadow.soft`.
+- **`postcss.config.js`** — `tailwindcss` + `autoprefixer`.
+- **`tsconfig.json`** — `strict: true`, `module: esnext`, `moduleResolution: bundler`, алиасы путей, `exclude: ["node_modules","supabase/functions/**"]`.
+- **`.eslintrc.json`** — `extends: ["next/core-web-vitals"]`.
+- **`components.json`** — конфиг shadcn/ui (`rsc: true`, baseColor `slate`, aliases `@/components`, `@/lib/utils`).
+- **`.env.example`** — требуемые переменные: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NOTIFICATION_SECRET`, `RESEND_API_KEY`, `RESEND_FROM`, `ESKIZ_SMS_EMAIL`, `ESKIZ_SMS_PASSWORD`, `ESKIZ_SMS_FROM`.
+- **`.gitignore`** — стандартный Next + `.env*`, `.next/`, `tsbuildinfo`, `next-env.d.ts`.
+- **`README.md`** — краткое описание и инструкция по запуску `supabase/seed.sql`.
+
+### `src/app/` — App Router
+
+- **`layout.tsx`** — корневой layout `<html lang="ru">`; оборачивает дерево в `AuthProvider` и подключает `globals.css`. Метаданные `title: "FemFlow"`.
+- **`page.tsx`** — `export { default } from "@main_page/MainPage"` (главная страница).
+- **`globals.css`** — базовые Tailwind слои + фоновый градиент `body` + утилиты `.no-scrollbar`.
+- **`api/notifications/route.ts`** — `POST`; валидирует `NOTIFICATION_SECRET`, вызывает Supabase Edge Function `send-notification` через service role client.
+- **`auth/callback/route.ts`** — `GET` для OAuth‑редиректа Supabase: берёт `?code=…`, обменивает на сессию, редиректит на `/`.
+- **`loginpage/desktop_ver/page.tsx` / `modile_ver/page.tsx`** — оба реэкспортят `@loginpage/LoginPage` (в самом компоненте уже есть адаптив). Канонический путь логина в коде: `/loginpage/modile_ver`.
+- **`mainpage/main_desktop/page.tsx` / `main_mobile/page.tsx`** — реэкспорт `@main_page/MainPage` (используются как альтернативные URL главной).
+- **`ivents_info/page.tsx`** — реэкспорт `@ivents_info/IventsInfoPage`. Ожидает `?id=<eventId>` в query.
+- **`profile/page.tsx`** — реэкспорт `@profile/ProfilePage`.
+- **`create-event/page.tsx`** — реэкспорт `@create_event/CreateEventPage` (защищено middleware, только `organizer`).
+- **`organizer-events/page.tsx`** — реэкспорт `@organizer_events/OrganizerEventsPage` (organizer‑only).
+- **`event-registration/page.tsx`** — реэкспорт `@event_registration/EventRegistrationPage`. Ждёт `?id=<eventId>`.
+- **`my-events/page.tsx`** — реэкспорт `@my_events/MyEventsPage` (требует аутентификацию).
+- **`rate-event/page.tsx`** — реэкспорт `@rate_event/RateEventPage`. Ждёт `?id=<eventId>`.
+- **`rate-participants/page.tsx`** — реэкспорт `@rate_participants/RateParticipantsPage` (organizer‑only).
+
+### `src/middleware.ts`
+
+Edge middleware Next.js:
+- `PROTECTED_ROUTES` = `/my-events`, `/event-registration`, `/profile` — нужен залогиненый пользователь.
+- `ORGANIZER_ROUTES` = `/create-event`, `/organizer-events`, `/rate-participants` — нужна роль `organizer` или `admin`.
+- `ADMIN_ROUTE_PREFIX` = `/admin` — только `admin`.
+- Роль читается из `user.user_metadata.role`, затем фоллбэк в таблицу `profiles`.
+- При отказе — редирект на `/loginpage/modile_ver?redirect=<origin>`.
+
+### `src/lib/`
+
+- **`utils.ts`** — `cn(...inputs)` = `twMerge(clsx(inputs))` для безопасного объединения Tailwind‑классов.
+- **`types.ts`** — доменные типы: `UserRole` (`participant | organizer`), `User`, `FemEvent` (с `tags: EventTypeId[]`, `maxParticipants`, `price`, `organizerId`, `coverUrl`), `Registration`, `EventRating`, `ParticipantStatus` (`active | on_time | absent_warned | absent_silent`), `ParticipantRating`.
+- **`event-types.ts`** — `EVENT_TYPES` (8 шт.: `lecture`, `masterclass`, `walk`, `talk`, `activity`, `board_games`, `trip`, `sport`), тип `EventTypeId`, хелпер `getEventType(id)`.
+- **`store.ts`** — единый слой данных для UI:
+  - in‑memory кэши (`eventsCache`, `registrationsCache`, `eventRatingsCache`, `participantRatingsCache`);
+  - `ensureSeed()`/`ensureBootstrap()` — первая загрузка из Supabase;
+  - CRUD‑функции (`saveEvent`, `deleteEvent`, `registerForEvent`, `cancelRegistration`, `saveEventRating`, `saveParticipantRatings`) — делают optimistic update, затем пишут в Supabase и перезагружают кэш;
+  - `subscribe(listener)` — слушает `femflow:store-change` + Supabase Realtime (таблицы `events`, `event_registrations`, `reviews`, `participant_ratings`);
+  - утилиты `isEventPast`, `formatEventDate` (русская локаль);
+  - `fireNotification(...)` — дергает `/api/notifications` на ключевых событиях;
+  - `makeId(prefix)` — генерация коротких id (используется при создании события).
+- **`use-events.ts`** — клиентские хуки над `store`: `useEvents()`, `useEvent(id)`, `useOrganizerEvents(organizerId)`, `useEventRegistrations(eventId)`, `useUserRegistrations(userId)`. Все подписываются через `subscribe`.
+- **`use-chat.ts`** — `useEventChat(eventId, enabled)`. Загружает последние 50 сообщений из `event_messages` с `profiles!user_id(display_name, avatar_url)`, подписывается на `INSERT` через Realtime, даёт `sendMessage(content)`.
+- **`auth-context.tsx`** — `AuthProvider` + хук `useAuth()`. Состояния: `user`, `profile`, `role: "guest" | "participant" | "organizer" | "admin"`, `ready`. Действия: `login(email, password)` / `login(name, role)` (совместимость со старым UI), `loginWithPhone(phone, otp)`, `loginWithGoogle()` (OAuth с `redirectTo /auth/callback`), `register(name, role, email, password)`, `logout()`, `switchRole(role)` (обновляет `profiles.role`).
+- **`upload.ts`** — `uploadAvatar(file, userId)` → bucket `avatars`, `uploadEventCover(file, eventId)` → bucket `event-covers`; оба возвращают публичный URL.
+- **`supabase/client.ts`** — `createClient()` через `@supabase/ssr.createBrowserClient`, читает `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- **`supabase/server.ts`** — две фабрики: `createServerSupabaseClient()` (обёртка `createServerClient` + cookie‑jar из `next/headers`) и `createServiceRoleClient()` (админский клиент на `SUPABASE_SERVICE_ROLE_KEY`, без автопродления сессии).
+- **`supabase/middleware.ts`** — `createMiddlewareSupabaseClient(request)` для `src/middleware.ts`: возвращает `{ supabase, response }` с синхронизацией cookie в `NextResponse`.
+
+### `src/components/ui/` (shadcn‑style)
+
+- **`button.tsx`** — `Button` + `buttonVariants` (CVA) с вариантами и размерами.
+- **`input.tsx`** — базовый `<input>` в Tailwind‑обёртке.
+- **`checkbox.tsx`** — обёртка над `@radix-ui/react-checkbox`.
+- **`avatar.tsx`** — `Avatar`/`AvatarImage`/`AvatarFallback` поверх `@radix-ui/react-avatar`.
+- **`badge.tsx`** — `Badge` + `badgeVariants`.
+- **`card.tsx`** — `Card`, `CardHeader`, `CardContent`, … .
+- **`progress.tsx`** — прогресс‑бар (используется на странице события).
+- **`separator.tsx`** — обёртка над `@radix-ui/react-separator`.
+- **`event-type-selector.tsx`** — кастомный селектор типов события (1–2 из `EVENT_TYPES`), используется на `CreateEventPage`.
+
+### `main_page/` — главная
+
+- **`MainPage.tsx`** — реальная главная: обе вёрстки (`md:hidden` / `hidden md:block`) в одном компоненте, данные через `useEvents()`, `formatEventDate`, `isEventPast`, `getEventType`. Делит события на `featured`, `small` (2 шт.) и `preview` (3 шт.). Показывает `BottomNav` только на мобильном и `DesktopFooter` только на десктопе.
+- **`main_desktop/DesktopMainPage.tsx`** — статичный шаблон desktop (дизайн‑заготовка без данных).
+- **`main_desktop/components/DesktopHeader.tsx`** — верхняя навигация desktop.
+- **`main_desktop/components/HeroDesktop.tsx`** — большой hero‑блок.
+- **`main_desktop/components/SectionTitle.tsx`** — заголовок секции с optional action.
+- **`main_desktop/components/CategoriesGrid.tsx`** — сетка категорий.
+- **`main_desktop/components/EventPreviewCard.tsx`** — карточка события в превью‑сетке.
+- **`main_desktop/components/DesktopFooter.tsx`** — футер desktop.
+- **`main_mobile/MobileMainPage.tsx`** — статичный шаблон mobile.
+- **`main_mobile/components/Header.tsx`** — топ‑бар mobile.
+- **`main_mobile/components/Hero.tsx`** — hero mobile.
+- **`main_mobile/components/SectionHeader.tsx`** — заголовок секции (mobile).
+- **`main_mobile/components/FeaturedEventCard.tsx`** — крупная карточка популярного события.
+- **`main_mobile/components/SmallEventCard.tsx`** — компактная карточка с иконкой и вариантом `light|dark`.
+- **`main_mobile/components/Directions.tsx`** — блок «направления».
+- **`main_mobile/components/Testimonial.tsx`** — цитата/отзыв основателя.
+- **`main_mobile/components/BottomNav.tsx`** — нижняя навигация mobile.
+
+### `loginpage/` — регистрация/вход
+
+- **`LoginPage.tsx`** — боевой компонент. Адаптив внутри: блок `md:hidden` (мобильная форма) и `hidden md:flex` (десктоп, две панели). Форма содержит имя, email/телефон, пароль, `RoleSwitcher`, чекбоксы подтверждения пола и правил. Использует `useAuth().login(name, role)` (упрощённый вариант без реальной аутентификации — только для старого UI) и делает `router.push(redirect)`.
+- **`desktop_ver/DesktopLoginPage.tsx`** — альтернативная desktop‑версия без логики (дизайн‑вариант), сейчас не подключена роутингом.
+- **`modile_ver/MobileLoginPage.tsx`** — альтернативная mobile‑версия без логики (дизайн‑вариант). **Важно**: сохраняется опечатка `modile_ver` — потому что на это имя завязаны реэкспорт в `src/app/loginpage/modile_ver/page.tsx` и редиректы из middleware.
+
+### `ivents_info/` — страница события
+
+- **`IventsInfoPage.tsx`** — `Suspense` + `useSearchParams().get("id")`, рендерит `MobileLayout` и `DesktopLayout`. Показывает детали события, прогресс заполнения мест, карточку организатора, чат участниц (`useEventChat` — только для зарегистрированных), кнопки «Зарегистрироваться» / «Вы уже записаны». На мобильном — нижняя sticky‑кнопка.
+- **`ivents_info_desktop/IventsInfoDesktopPage.tsx`** — альтернативный шаблон desktop.
+- **`ivents_info_desktop/components/IventsInfoDesktopHeader.tsx`** — хедер страницы события (desktop).
+- **`ivents_info_mobile/IventsInfoMobilePage.tsx`** — альтернативный шаблон mobile.
+- **`ivents_info_mobile/components/IventsInfoMobileTopBar.tsx`** — верхняя панель mobile.
+- **`ivents_info_mobile/components/IventsInfoMobileImagePlaceholder.tsx`** — обёртка под картинку (с градиентным плейсхолдером).
+
+### `profile/` — профиль
+
+- **`ProfilePage.tsx`** — обе вёрстки в одном компоненте: mobile‑блок и 12‑колоночный desktop‑grid. Сейчас использует хардкод‑данные профиля (`PROFILE`, `MOBILE_PROFILE`, `ABOUT`, события) — место для будущей интеграции с `auth-context` и `store`.
+- **`profile_desktop/DesktopProfilePage.tsx`** — шаблон desktop (без логики).
+- **`profile_desktop/components/ProfileDesktopHeader.tsx`** — хедер desktop.
+- **`profile_desktop/components/EventsToggle.tsx`** — переключатель «Upcoming/Past».
+- **`profile_desktop/components/ProfileStatCard.tsx`** — карточка статистики.
+- **`profile_mobile/MobileProfilePage.tsx`** — шаблон mobile.
+- **`profile_mobile/components/ProfileTopBar.tsx`** — топ‑бар.
+- **`profile_mobile/components/ProfileStats.tsx`** — блок со счётчиками активности.
+- **`profile_mobile/components/ProfileEventRow.tsx`** — строка события с изображением и подзаголовком (экспортирует тип `ProfileEvent`).
+- **`profile_mobile/components/ProfileBottomNav.tsx`** — нижняя навигация.
+
+### Фичи (каждая — один файл‑страница)
+
+- **`create_event/CreateEventPage.tsx`** — форма организатора. Поля: `title`, `description` (до 500 символов), `tags` (через `EventTypeSelector`), `date`, `time`, `location`, `maxParticipants`, `price`, обложка. Сразу генерит `eventId` через `makeId("evt")`, загружает обложку через `uploadEventCover`, сохраняет событие через `saveEvent(event)`. Защищено ролью `organizer` (делает `router.replace` если роль не та).
+- **`organizer_events/OrganizerEventsPage.tsx`** — список событий организатора с табами `upcoming|past`, ссылки на редактирование, карточки с числом записавшихся, звёздами и ссылкой на `rate-participants`.
+- **`event_registration/EventRegistrationPage.tsx`** — форма подтверждения записи: показывает событие, число занятых мест, чекбокс согласия с правилами, кнопку «Зарегистрироваться» (`registerForEvent`). При успехе — экран подтверждения с редиректом.
+- **`my_events/MyEventsPage.tsx`** — события, на которые записана пользователь. Разделение `upcoming|past`, возможность отменить запись (`cancelRegistration`) и перейти к оценке (`/rate-event?id=…`).
+- **`rate_event/RateEventPage.tsx`** — звёздный рейтинг 1–5, текстовый отзыв (до 300 символов), чекбоксы «хочу прийти снова / новые знакомства / рекомендую». Сохраняет через `saveEventRating`.
+- **`rate_participants/RateParticipantsPage.tsx`** — организатор проставляет каждой записавшейся один из статусов (`active | on_time | absent_warned | absent_silent`) и сохраняет через `saveParticipantRatings`.
+- **`all_one/`** — пустая папка, зарезервирована под будущие эксперименты (в содержимом сейчас файлов нет, в `tailwind.config.ts` и `tsconfig.paths` не включена).
+
+### `supabase/`
+
+- **`seed.sql`** — идемпотентный DO‑блок: апдейтит `profiles` выбранного `SEED_ORGANIZER_UUID` в роль `organizer` и вставляет 4 события (`evt_seed_1..4`) с `on conflict (id) do update`.
+- **`notifications.sql`** — документация/шпаргалка по настройке `pg_cron` + `pg_net` для отправки напоминаний `event_reminder` за ~24 часа до события (сейчас весь код закомментирован).
+- **`functions/send-notification/index.ts`** — Deno Edge Function. Валидирует `x-notification-secret`, достаёт событие из Postgres, формирует текст по `type` (`registration_confirmed | event_reminder | event_cancelled | event_approved | event_rejected`). Канал доставки — email через Resend API, при отсутствии email — SMS через Eskiz (`notify.eskiz.uz`) с автопродлением токена на 50 минут. Для `event_cancelled` рассылает всем записавшимся участницам.
+
+## Правила навигации по коду (для изменений)
+
+- **Новая страница/роут**: создаём папку‑фичу в корне (например, `feature_x/FeatureXPage.tsx`), добавляем алиас в `tsconfig.json` (`@feature_x/*`) и content‑glob в `tailwind.config.ts`, в `src/app/<route>/page.tsx` пишем `export { default } from "@feature_x/FeatureXPage"`. При необходимости защиты — добавляем путь в `PROTECTED_ROUTES` / `ORGANIZER_ROUTES` в `src/middleware.ts` и в `config.matcher`.
+- **Данные/Supabase**: CRUD идёт **только через `src/lib/store.ts`** (плюс хуки из `use-events.ts`), чтобы сохранялись optimistic update, Realtime и уведомления. Прямые вызовы `createClient().from("...")` допустимы только в специализированных хуках (`use-chat.ts`) и серверных маршрутах.
+- **Аутентификация**: через `useAuth()` из `src/lib/auth-context.tsx`. Никакого `localStorage` — источник истины Supabase.
+- **Стили/UI**: переиспользуем `src/components/ui/*` и палитру `fem-*`/`shadow-soft`; избегаем дублирования одинаковых примитивов между `src/components` и фичевыми папками.
+- **Адаптив**: две вёрстки в одном компоненте через `md:hidden` и `hidden md:block` — не плодим новые роуты для desktop/mobile.
+- **Опечатка `modile_ver`**: не исправляем без отдельной задачи — на имя завязаны роуты и редиректы в middleware.
+- **Уведомления**: триггерим через `POST /api/notifications` (внутри `store.ts`). Секрет `NOTIFICATION_SECRET` обязательно должен быть настроен.
