@@ -1,0 +1,542 @@
+/* Глобальные стили + слайдер + карточки (памятка под референс) */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+#root {
+  min-height: 100dvh;
+  min-width: 100%;
+}
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+:root {
+  --bg: #f0e8dc;
+  --paper: #fdf8e6;
+  --paper-line: rgba(120, 100, 80, 0.14);
+  --ink: #2a2622;
+  --ink-soft: #4d453c;
+  --sage: #a7c1b1;
+  --sage-dark: #7d9a8a;
+  --tape: #c4a882;
+  --tape-wash: rgba(150, 120, 80, 0.35);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.1);
+  --shadow-photo: 0 6px 18px rgba(0, 0, 0, 0.16);
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Montserrat", "Segoe UI", system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ----- Swipe layout ----- */
+.swipe-root {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  max-width: 100vw;
+  max-height: 100dvh;
+  margin: 0 auto;
+  background: var(--bg);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.swipe-viewport {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0 auto;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+}
+.swipe-viewport:active {
+  cursor: grabbing;
+}
+
+.swipe-track {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  will-change: transform;
+}
+
+.swipe-slide {
+  flex: 0 0 100%;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  padding: max(8px, env(safe-area-inset-top, 0px)) max(8px, env(safe-area-inset-right, 0px))
+    max(16px, env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px));
+}
+
+/* Центр «сторис» на десктопе — девятнадцатая часть как на телефоне */
+@media (min-width: 600px) {
+  .swipe-slide {
+    padding: 12px 16px 28px;
+  }
+  .swipe-viewport {
+    max-width: min(100vw, 420px);
+  }
+}
+
+/* Точки */
+.swipe-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px 12px;
+  z-index: 2;
+  flex-shrink: 0;
+  background: linear-gradient(to top, var(--bg), rgba(240, 232, 220, 0.92) 50%, transparent);
+}
+.swipe-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  background: var(--sage);
+  opacity: 0.4;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.swipe-dot.is-active {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+/* ----- Card ----- */
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-height: 100%;
+  background: var(--paper);
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 27px,
+    var(--paper-line) 27px,
+    var(--paper-line) 28px
+  );
+  border-radius: 2px;
+  box-shadow: var(--shadow-card);
+  padding: 18px 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+  margin: 0;
+}
+
+.card::before,
+.card::after {
+  content: "";
+  position: absolute;
+  width: 48px;
+  height: 16px;
+  background: linear-gradient(180deg, var(--tape), #d8c49a);
+  opacity: 0.88;
+  box-shadow: 0 1px 3px var(--tape-wash);
+  pointer-events: none;
+  z-index: 2;
+}
+.card::before {
+  top: -6px;
+  left: 8px;
+  transform: rotate(-5deg);
+}
+.card::after {
+  top: -6px;
+  right: 8px;
+  transform: rotate(4deg);
+}
+
+/* --- Typography (как в макете: serif для заголовков) --- */
+.serif-ttl {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(1.1rem, 3.2vw, 1.4rem);
+  line-height: 1.2;
+  text-align: center;
+  color: var(--ink);
+}
+.sans-ttl {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: clamp(0.68rem, 2.1vw, 0.8rem);
+  line-height: 1.3;
+  text-align: center;
+  color: var(--ink);
+}
+.subtitle {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 0.95rem;
+  text-align: center;
+  color: var(--ink-soft);
+}
+.caps-label {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 0.62rem;
+  text-align: center;
+  color: var(--ink-soft);
+}
+.lead {
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+  line-height: 1.3;
+  text-align: center;
+  color: var(--ink);
+}
+.note {
+  font-family: "Cormorant Garamond", serif;
+  font-style: italic;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  text-align: center;
+}
+.heart {
+  text-align: center;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.hl {
+  background: var(--sage);
+  color: #fff;
+  padding: 2px 8px 3px;
+  border-radius: 3px;
+  display: inline-block;
+  line-height: 1.25;
+  font-weight: 600;
+  font-size: 0.95em;
+}
+.hl--small {
+  font-size: 0.85em;
+  font-weight: 600;
+}
+
+.oval-ttl {
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  padding: 14px 12px;
+  text-align: center;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: clamp(0.65rem, 1.8vw, 0.75rem);
+  line-height: 1.35;
+  margin: 0 auto 4px;
+  max-width: 92%;
+  aspect-ratio: 1.4 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pill {
+  display: inline-block;
+  background: var(--sage);
+  color: #fff;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 0.6rem;
+  padding: 3px 8px;
+  border-radius: 2px;
+}
+
+.bullets {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.8rem;
+  line-height: 1.3;
+  color: var(--ink);
+  padding: 0 2px 0 4px;
+}
+.bullets li {
+  position: relative;
+  padding-left: 14px;
+}
+.bullets li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--ink);
+  font-size: 1em;
+}
+
+.icon-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.8rem;
+  line-height: 1.3;
+  padding: 0 2px;
+}
+.icon-list li {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  align-items: start;
+  gap: 5px;
+}
+.icon-list .ico {
+  text-align: center;
+  line-height: 1.2;
+  font-size: 1.05rem;
+}
+
+/* Photos + tape */
+.photo {
+  position: relative;
+  display: block;
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: var(--shadow-photo);
+  flex-shrink: 0;
+}
+.photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ph-wide {
+  aspect-ratio: 4 / 3;
+  margin-top: 4px;
+}
+.ph-tall {
+  aspect-ratio: 3 / 4;
+}
+.ph-tape::before,
+.ph-tape::after {
+  content: "";
+  position: absolute;
+  top: -7px;
+  width: 40px;
+  height: 14px;
+  background: linear-gradient(180deg, var(--tape), #c9b28a);
+  opacity: 0.92;
+  box-shadow: 0 1px 3px var(--tape-wash);
+  z-index: 1;
+  pointer-events: none;
+}
+.ph-tape::before {
+  left: 8px;
+  transform: rotate(-6deg);
+}
+.ph-tape::after {
+  right: 8px;
+  transform: rotate(5deg);
+}
+
+/* Slide 1: две колонки + овал сверху */
+.s1-oval {
+  max-width: 100%;
+  margin-bottom: 2px;
+}
+.s1-photos {
+  display: grid;
+  grid-template-columns: 1fr 0.42fr;
+  gap: 8px;
+  margin-top: auto;
+  min-height: 0;
+  align-items: end;
+  flex: 1;
+}
+.s1-photos .ph-tall {
+  height: 100%;
+  max-height: min(52dvh, 360px);
+}
+.s1-photos .ph-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.s1-photos .ph-tape-sm {
+  aspect-ratio: 3 / 4;
+  max-height: 42%;
+}
+
+.p80 {
+  text-align: center;
+  line-height: 1.1;
+  margin: 0;
+}
+.p80 .big-num {
+  font-family: "Cormorant Garamond", serif;
+  font-size: clamp(2.1rem, 8vw, 2.6rem);
+  font-weight: 700;
+  color: #fff;
+  background: var(--sage);
+  padding: 2px 12px 4px;
+  border-radius: 4px;
+  display: inline-block;
+  line-height: 1;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+.p80 .rest {
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+
+.title-under {
+  text-align: center;
+  font-family: "Montserrat", sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: clamp(0.68rem, 2.1vw, 0.8rem);
+  line-height: 1.3;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--ink);
+  margin: 0 0 2px 0;
+}
+.title-under::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 1px;
+  background: var(--ink);
+  margin-bottom: 8px;
+}
+
+.details-txt {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  text-align: center;
+  color: var(--ink);
+  font-family: "Cormorant Garamond", serif;
+}
+.detail-icons {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+  font-size: 1.15rem;
+  padding: 2px 2px 4px;
+  filter: grayscale(0.15) sepia(0.1);
+  opacity: 0.95;
+}
+
+.contacts p {
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--ink);
+  text-align: center;
+  font-family: "Cormorant Garamond", serif;
+}
+.contacts .line {
+  margin-bottom: 6px;
+}
+.contacts .list {
+  font-size: 0.82rem;
+  color: var(--ink);
+  text-align: center;
+}
+.contacts .list-title {
+  font-weight: 600;
+  margin-top: 4px;
+  font-family: "Montserrat", sans-serif;
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.contact-icon-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 0.8rem;
+}
+.contact-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 0.9rem;
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  margin-top: 4px;
+}
+.pair .ph-tall {
+  aspect-ratio: 3 / 4;
+}
+
+.thumb-ico {
+  display: inline-flex;
+  width: 1.1em;
+  height: 1.1em;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
+}
