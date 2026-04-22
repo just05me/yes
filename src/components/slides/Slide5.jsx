@@ -1,3 +1,5 @@
+import { publicImage } from '../../utils/publicImage.js';
+
 export default function Slide5() {
   return (
     <article className="card card--5" aria-labelledby="s5-title">
@@ -13,10 +15,10 @@ export default function Slide5() {
       </ul>
       <div className="photo-pair">
         <figure className="photo photo--taped">
-          <img src="/images/photo_5_2026-04-22_17-27-43.jpg" alt="Папа с ребёнком в траве" loading="lazy" />
+          <img src={publicImage('photo_5_2026-04-22_17-27-43.jpg')} alt="Папа с ребёнком в траве" loading="lazy" />
         </figure>
         <figure className="photo photo--taped">
-          <img src="/images/photo_6_2026-04-22_17-27-43.jpg" alt="Семья держится за руки в поле" loading="lazy" />
+          <img src={publicImage('photo_6_2026-04-22_17-27-43.jpg')} alt="Семья держится за руки в поле" loading="lazy" />
         </figure>
       </div>
     </article>

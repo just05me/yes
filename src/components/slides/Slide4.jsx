@@ -1,3 +1,5 @@
+import { publicImage } from '../../utils/publicImage.js';
+
 export default function Slide4() {
   return (
     <article className="card card--4" aria-labelledby="s4-title">
@@ -12,7 +14,7 @@ export default function Slide4() {
         <li>Хорошее настроение</li>
       </ul>
       <figure className="photo photo--wide" style={{ aspectRatio: '4 / 3' }}>
-        <img src="/images/photo_4_2026-04-22_17-27-43.jpg" alt="Мама целует ребёнка на природе" loading="lazy" />
+        <img src={publicImage('photo_4_2026-04-22_17-27-43.jpg')} alt="Мама целует ребёнка на природе" loading="lazy" />
       </figure>
     </article>
   );

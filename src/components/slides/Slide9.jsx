@@ -1,3 +1,5 @@
+import { publicImage } from '../../utils/publicImage.js';
+
 export default function Slide9() {
   return (
     <article className="card card--9" aria-labelledby="s9-title">
@@ -8,7 +10,7 @@ export default function Slide9() {
       </p>
       <span className="heart" aria-hidden="true">♡</span>
       <figure className="photo photo--taped photo--wide">
-        <img src="/images/photo_9_2026-04-22_17-27-43.jpg" alt="Пара целуется в поле" loading="lazy" />
+        <img src={publicImage('photo_9_2026-04-22_17-27-43.jpg')} alt="Пара целуется в поле" loading="lazy" />
       </figure>
     </article>
   );

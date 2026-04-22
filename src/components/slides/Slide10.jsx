@@ -1,3 +1,5 @@
+import { publicImage } from '../../utils/publicImage.js';
+
 export default function Slide10() {
   return (
     <article className="card card--10" aria-labelledby="s10-title">
@@ -24,7 +26,7 @@ export default function Slide10() {
         <p className="list">@ +7 (999) 123-45-67</p>
       </div>
       <figure className="photo photo--taped photo--wide">
-        <img src="/images/photo_10_2026-04-22_17-27-43.jpg" alt="Семья целует малыша" loading="lazy" />
+        <img src={publicImage('photo_10_2026-04-22_17-27-43.jpg')} alt="Семья целует малыша" loading="lazy" />
       </figure>
     </article>
   );

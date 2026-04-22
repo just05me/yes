@@ -1,3 +1,5 @@
+import { publicImage } from '../../utils/publicImage.js';
+
 export default function Slide6() {
   return (
     <article className="card card--6" aria-labelledby="s6-title">
@@ -13,7 +15,7 @@ export default function Slide6() {
         эмоции
       </p>
       <figure className="photo photo--taped photo--wide">
-        <img src="/images/photo_7_2026-04-22_17-27-43.jpg" alt="Семья обнимается в поле" loading="lazy" />
+        <img src={publicImage('photo_7_2026-04-22_17-27-43.jpg')} alt="Семья обнимается в поле" loading="lazy" />
       </figure>
       <span className="heart" aria-hidden="true">♡</span>
     </article>

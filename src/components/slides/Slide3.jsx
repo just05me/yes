@@ -1,3 +1,5 @@
+import { publicImage } from '../../utils/publicImage.js';
+
 export default function Slide3() {
   return (
     <article className="card card--3" aria-labelledby="s3-title">
@@ -13,7 +15,7 @@ export default function Slide3() {
         <li>Главное{'\u00A0'}— это проздааная и{'\u00A0'}колеста</li>
       </ul>
       <figure className="photo photo--wide">
-        <img src="/images/photo_3_2026-04-22_17-27-43.jpg" alt="Семья в парке в пастельных тонах" loading="lazy" />
+        <img src={publicImage('photo_3_2026-04-22_17-27-43.jpg')} alt="Семья в парке в пастельных тонах" loading="lazy" />
       </figure>
     </article>
   );

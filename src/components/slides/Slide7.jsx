@@ -1,3 +1,5 @@
+import { publicImage } from '../../utils/publicImage.js';
+
 export default function Slide7() {
   return (
     <article className="card card--7" aria-labelledby="s7-title">
@@ -17,7 +19,7 @@ export default function Slide7() {
         букет полевых цветов.
       </p>
       <figure className="photo photo--wide">
-        <img src="/images/photo_8_2026-04-22_17-27-43.jpg" alt="Семья на фоне холмов" loading="lazy" />
+        <img src={publicImage('photo_8_2026-04-22_17-27-43.jpg')} alt="Семья на фоне холмов" loading="lazy" />
       </figure>
     </article>
   );
